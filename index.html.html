@@ -1,0 +1,660 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:transparent;color:var(--color-text-primary)}
+.app{max-width:680px;margin:0 auto;padding:0}
+.home{padding:1.5rem 0}
+.home-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.home-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.5rem}
+.stat-card{background:var(--color-background-secondary);border-radius:10px;padding:12px;text-align:center}
+.stat-num{font-size:22px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.stat-label{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.mode-btn{background:var(--color-background-primary);border:1.5px solid var(--color-border-secondary);border-radius:12px;padding:14px;cursor:pointer;text-align:left;transition:all .15s}
+.mode-btn:hover,.mode-btn.active{border-color:#185FA5;background:#E6F1FB}
+.mode-icon{font-size:20px;margin-bottom:6px}
+.mode-name{font-size:14px;font-weight:600;color:var(--color-text-primary)}
+.mode-desc{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.filter-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.filter-label{font-size:12px;color:var(--color-text-secondary)}
+.tag{padding:5px 11px;border-radius:99px;border:1px solid var(--color-border-secondary);font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary);transition:all .12s}
+.tag.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.source-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.start-btn{width:100%;padding:14px;border-radius:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.start-btn:hover{opacity:.85}
+.link-btn{background:none;border:none;cursor:pointer;font-size:13px;color:var(--color-text-secondary);font-family:inherit;text-decoration:underline;margin-top:10px;display:block;text-align:center}
+
+/* QUIZ */
+.quiz{padding:1rem 0 2rem}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.quiz-back{background:none;border:none;cursor:pointer;font-size:13px;color:var(--color-text-secondary);padding:6px 10px;border-radius:8px;font-family:inherit}
+.quiz-back:hover{background:var(--color-background-secondary)}
+.quiz-progress-text{font-size:13px;color:var(--color-text-secondary);font-family:'IBM Plex Mono',monospace}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:99px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:#1D9E75;border-radius:99px;transition:width .3s}
+.q-meta{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.q-tag{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600}
+.q-tag.tema{background:#E6F1FB;color:#185FA5}
+.q-tag.src-docx{background:#EEEDFE;color:#3C3489}
+.q-tag.src-kah{background:#E1F5EE;color:#0F6E56}
+.q-tag.src-rep{background:#FAEEDA;color:#633806}
+.q-tag.dif-alta{background:#FAECE7;color:#993C1D}
+.q-tag.dif-media{background:#FAEEDA;color:#854F0B}
+.q-tag.dif-baja{background:#E1F5EE;color:#0F6E56}
+.question-text{font-size:16px;font-weight:600;line-height:1.5;margin-bottom:1.25rem}
+.options{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.option{padding:12px 16px;border-radius:10px;border:1.5px solid var(--color-border-secondary);cursor:pointer;font-size:14px;color:var(--color-text-primary);transition:all .12s;display:flex;align-items:flex-start;gap:10px;line-height:1.45;background:var(--color-background-primary);text-align:left}
+.option:hover:not(.disabled){border-color:#185FA5;background:#E6F1FB;color:#185FA5}
+.option.correct{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56}
+.option.wrong{border-color:#D85A30;background:#FAECE7;color:#993C1D}
+.option.show-correct{border-color:#1D9E75;background:#E1F5EE;color:#0F6E56}
+.option.disabled{cursor:default}
+.opt-letter{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:12px;background:var(--color-background-secondary);padding:2px 6px;border-radius:4px;flex-shrink:0;margin-top:1px}
+.explanation{background:var(--color-background-secondary);border-radius:10px;padding:14px;font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:1rem;border-left:3px solid #1D9E75;display:none}
+.explanation.wrong-exp{border-left-color:#D85A30}
+.explanation.show{display:block}
+.next-btn{width:100%;padding:13px;border-radius:10px;background:var(--color-text-primary);color:var(--color-background-primary);border:none;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:none}
+.next-btn.show{display:block}
+
+/* FLASH */
+.flashcard-wrap{perspective:1000px;margin:1.5rem 0;cursor:pointer}
+.flashcard{position:relative;width:100%;min-height:180px;transition:transform .5s;transform-style:preserve-3d}
+.flashcard.flipped{transform:rotateY(180deg)}
+.card-face{position:absolute;width:100%;min-height:180px;backface-visibility:hidden;border-radius:14px;border:1.5px solid var(--color-border-secondary);padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.card-front{background:var(--color-background-primary)}
+.card-back{background:var(--color-background-secondary);transform:rotateY(180deg)}
+.card-hint{font-size:11px;color:var(--color-text-secondary);margin-bottom:12px}
+.card-q{font-size:15px;font-weight:600;line-height:1.5}
+.card-a{font-size:14px;color:#1D9E75;font-weight:600;line-height:1.5}
+.card-controls{display:flex;gap:8px}
+.card-btn{flex:1;padding:10px;border-radius:8px;border:1px solid var(--color-border-secondary);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .12s}
+.card-btn.yes{background:#E1F5EE;color:#1D9E75;border-color:#1D9E75}
+.card-btn.no{background:#FAECE7;color:#D85A30;border-color:#D85A30}
+
+/* RESULTS */
+.results{padding:1.5rem 0;text-align:center}
+.score-circle{width:110px;height:110px;border-radius:50%;margin:0 auto 1rem;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:28px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.score-circle.pass{background:#E1F5EE;color:#1D9E75;border:3px solid #1D9E75}
+.score-circle.fail{background:#FAECE7;color:#D85A30;border:3px solid #D85A30}
+.score-circle .score-label{font-size:11px;font-weight:500;font-family:'Space Grotesk',sans-serif}
+.results-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.results-sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:1.5rem}
+.results-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:1.5rem}
+.res-stat{background:var(--color-background-secondary);border-radius:10px;padding:12px}
+.res-num{font-size:20px;font-weight:700;font-family:'IBM Plex Mono',monospace}
+.res-num.g{color:#1D9E75}.res-num.r{color:#D85A30}.res-num.b{color:#185FA5}
+.res-lbl{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.review-list{text-align:left;margin-bottom:1.5rem}
+.review-title{font-size:12px;font-weight:600;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.review-item{padding:10px 12px;border-radius:8px;background:#FAECE7;border-left:3px solid #D85A30;margin-bottom:6px;font-size:13px}
+.review-correct{font-size:12px;color:#1D9E75;margin-top:4px;font-weight:500}
+.res-btns{display:flex;gap:8px}
+.res-btn{flex:1;padding:12px;border-radius:10px;border:1.5px solid var(--color-border-secondary);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-primary);transition:all .12s}
+.res-btn:hover{background:var(--color-background-secondary)}
+.res-btn.primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+
+/* CHEAT */
+.cheatsheet{padding:1rem 0 2rem}
+.cs-back{background:none;border:none;cursor:pointer;font-size:14px;color:var(--color-text-secondary);padding:6px 0;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:1rem}
+.cs-title{font-size:18px;font-weight:700;margin-bottom:1rem}
+.cs-section{margin-bottom:10px;border:1px solid var(--color-border-tertiary);border-radius:10px;overflow:hidden}
+.cs-head{padding:12px 14px;background:var(--color-background-secondary);font-size:13px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.cs-body{padding:12px 14px;font-size:13px;display:none}
+.cs-body.open{display:block}
+.cs-row{display:flex;gap:8px;align-items:baseline;padding:4px 0;border-bottom:.5px solid var(--color-border-tertiary)}
+.cs-row:last-child{border-bottom:none}
+.cs-key{font-weight:600;color:var(--color-text-primary);min-width:150px;font-size:12px;flex-shrink:0}
+.cs-val{color:var(--color-text-secondary);font-size:12px;line-height:1.5}
+.hidden{display:none!important}
+</style>
+
+<div class="app" id="app">
+
+<!-- HOME -->
+<div class="home" id="screen-home">
+  <div class="home-title">📚 Simulador Diseño T8–T15</div>
+  <div class="home-sub" id="home-sub">159 preguntas · Examen + Kahoot T8-T15 + Repaso general</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="stat-total">159</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-done">0</div><div class="stat-label">Hechas</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-correct">0</div><div class="stat-label">Correctas</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-pct">—</div><div class="stat-label">% Acierto</div></div>
+  </div>
+  <div class="mode-grid">
+    <button class="mode-btn active" onclick="setMode('simulacro',this)"><div class="mode-icon">⏱</div><div class="mode-name">Simulacro</div><div class="mode-desc">30 preguntas · como el examen real</div></button>
+    <button class="mode-btn" onclick="setMode('flashcards',this)"><div class="mode-icon">🃏</div><div class="mode-name">Flashcards</div><div class="mode-desc">Repasa conceptos girando cartas</div></button>
+    <button class="mode-btn" onclick="setMode('porTema',this)"><div class="mode-icon">📖</div><div class="mode-name">Por tema</div><div class="mode-desc">Estudia tema a tema</div></button>
+    <button class="mode-btn" onclick="setMode('fallos',this)"><div class="mode-icon">🎯</div><div class="mode-name">Mis fallos</div><div class="mode-desc">Solo las preguntas que fallas</div></button>
+  </div>
+
+  <div id="filters-tema" class="filter-row" style="display:none">
+    <span class="filter-label">Tema:</span>
+    <span class="tag active" onclick="selTema(this,'todos')">Todos</span>
+    <span class="tag" onclick="selTema(this,'T8')">T8</span>
+    <span class="tag" onclick="selTema(this,'T9')">T9</span>
+    <span class="tag" onclick="selTema(this,'T10')">T10</span>
+    <span class="tag" onclick="selTema(this,'T11')">T11</span>
+    <span class="tag" onclick="selTema(this,'T12')">T12</span>
+    <span class="tag" onclick="selTema(this,'T13')">T13</span>
+    <span class="tag" onclick="selTema(this,'T14')">T14</span>
+    <span class="tag" onclick="selTema(this,'T15')">T15</span>
+  </div>
+
+  <div class="source-row" id="filters-source">
+    <span class="filter-label">Fuente:</span>
+    <span class="tag active" onclick="selSrc(this,'todas')">Todas</span>
+    <span class="tag" onclick="selSrc(this,'docx')">📝 Examen (84)</span>
+    <span class="tag" onclick="selSrc(this,'kah')">🎮 Kahoot temas (64)</span>
+    <span class="tag" onclick="selSrc(this,'rep')">🔁 Repaso general (11)</span>
+  </div>
+
+  <button class="start-btn" id="start-btn" onclick="startSession()">Empezar simulacro ↗</button>
+  <button class="link-btn" onclick="showCheatsheet()">Ver resumen por temas →</button>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz hidden" id="screen-quiz">
+  <div class="quiz-header">
+    <button class="quiz-back" onclick="goHome()">← Salir</button>
+    <span class="quiz-progress-text" id="q-progress">1/30</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="q-meta" id="q-meta"></div>
+  <div class="question-text" id="q-text"></div>
+  <div class="options" id="q-options"></div>
+  <div class="explanation" id="q-explanation"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+</div>
+
+<!-- FLASH -->
+<div class="quiz hidden" id="screen-flash">
+  <div class="quiz-header">
+    <button class="quiz-back" onclick="goHome()">← Salir</button>
+    <span class="quiz-progress-text" id="f-progress">1/—</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="f-fill" style="width:0%"></div></div>
+  <div class="q-meta" id="f-meta"></div>
+  <div class="flashcard-wrap" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="card-face card-front"><div class="card-hint">— toca para ver la respuesta —</div><div class="card-q" id="f-question"></div></div>
+      <div class="card-face card-back"><div class="card-hint">¿Lo sabías?</div><div class="card-a" id="f-answer"></div></div>
+    </div>
+  </div>
+  <div class="card-controls" id="card-controls" style="display:none">
+    <button class="card-btn no" onclick="cardResult(false)">✗ No lo sabía</button>
+    <button class="card-btn yes" onclick="cardResult(true)">✓ Lo sabía</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="results hidden" id="screen-results">
+  <div class="score-circle" id="score-circle"><div id="score-pct">0%</div><div class="score-label" id="score-label">—</div></div>
+  <div class="results-title" id="res-title">Simulacro completado</div>
+  <div class="results-sub" id="res-sub"></div>
+  <div class="results-grid">
+    <div class="res-stat"><div class="res-num g" id="res-correct">0</div><div class="res-lbl">Correctas</div></div>
+    <div class="res-stat"><div class="res-num r" id="res-wrong">0</div><div class="res-lbl">Fallos</div></div>
+    <div class="res-stat"><div class="res-num b" id="res-total">0</div><div class="res-lbl">Total</div></div>
+  </div>
+  <div class="review-list" id="review-list"></div>
+  <div class="res-btns">
+    <button class="res-btn" onclick="goHome()">← Inicio</button>
+    <button class="res-btn primary" onclick="repeatFails()">Repetir fallos ↗</button>
+  </div>
+</div>
+
+<!-- CHEAT -->
+<div class="cheatsheet hidden" id="screen-cheat">
+  <button class="cs-back" onclick="goHome()">← Inicio</button>
+  <div class="cs-title">📋 Resumen por temas</div>
+  <div id="cheat-content"></div>
+</div>
+
+</div>
+
+<script>
+// ===================== BANCO COMPLETO DE PREGUNTAS =====================
+const Q = [
+// ── T8 EXAMEN (docx) ────────────────────────────────────────────────
+{id:1,t:"T8",s:"docx",q:"¿Qué dos tipos de formas creativas básicas hay?",o:["Pensamiento conceptual y convergente","Pensamiento convergente y divergente","Todas las anteriores","Ninguna"],c:1,e:"Existen 2: <b>pensamiento convergente</b> (busca una única solución) y <b>pensamiento divergente</b> (enfoque abierto, varios caminos posibles)."},
+{id:2,t:"T8",s:"docx",q:"¿Qué es la creatividad?",o:["Capacidad de producir ideas originales","Arte de generar conexiones entre hechos divergentes","Capacidad de establecer conexiones entre ideas no relacionadas","Todas son correctas"],c:3,e:"La creatividad engloba las 3 definiciones: producir ideas originales, establecer conexiones entre ideas no relacionadas y generar conexiones entre hechos divergentes."},
+{id:3,t:"T8",s:"docx",q:"La creatividad de estilo emocional:",o:["Utiliza argumentos de ventajas del producto","Influye sobre el compromiso del usuario con el producto, servicio o marca","Tiene como objetivo explotar las necesidades económicas","Utiliza argumentos de las ventajas tras la compra"],c:1,e:"El estilo emocional <b>influye sobre el compromiso</b> del usuario con el producto/servicio/marca. El racional usa argumentos de ventajas del producto."},
+{id:4,t:"T8",s:"docx",q:"En el pensamiento divergente:",o:["Trata de eliminar todas las posibilidades excepto una","Algunos problemas pueden resolverse mediante un único camino","Algunos problemas pueden resolverse mediante varios caminos","Usa la lógica más que la creatividad"],c:2,e:"El pensamiento divergente es un enfoque <b>abierto</b>: cree que los problemas pueden resolverse por <b>varios caminos</b> y tienen más de una respuesta."},
+{id:5,t:"T8",s:"docx",q:"¿Qué estilo creativo busca influir en la implicación emocional del consumidor?",o:["Racional","Emocional","Informativo","Técnico"],c:1,e:"El estilo <b>emocional</b> apela a las emociones del consumidor e influye sobre su compromiso con la marca."},
+{id:6,t:"T8",s:"docx",q:"En el enfoque asociativo de la creatividad pueden estar presentes…",o:["Serendipia, semejanza y mediación","Serendipia, luminiscencia y mediación","Semejanza, luminiscencia y meditación","Serendipia, resiliencia y mediación"],c:0,e:"El enfoque asociativo tiene 3 formas: <b>Serendipia</b> (casualidad), <b>Semejanza</b> (similitud) y <b>Mediación</b> (elementos comunes)."},
+{id:7,t:"T8",s:"docx",q:"¿Cuáles son las apelaciones emocionales?",o:["Atractivo personal, social, llamamiento al miedo y apelación al humor","Atractivo social, personal, miedo y humor","Atractivo racional, social, miedo y humor","Las dos primeras son correctas"],c:0,e:"Apelaciones emocionales: <b>atractivo personal, atractivo social, llamamiento al miedo y apelación al humor</b> (y otros: sexual, musical, escasez...)."},
+{id:8,t:"T8",s:"docx",q:"¿Cuáles son los modelos analógicos de creatividad?",o:["Sinéctica, semejanza, método funcional, relaciones forzadas","Sinéctica, biónica, método funcional, asociaciones o relaciones forzadas","Serendipia, semejanza y mediación","Ninguna de las anteriores"],c:1,e:"Métodos analógicos: <b>Sinéctica, Biónica, Método funcional y Asociaciones/relaciones forzadas</b>."},
+{id:9,t:"T8",s:"docx",q:"¿Cuáles son los pasos del proceso creativo según Osborn?",o:["Orientación, preparación, análisis, ideación, incubación, creencias y evaluación","Orientación, preparación, análisis, ideación, incubación y evaluación","Orientación, preparación, análisis, ideación, incubación, síntesis y evaluación","Ninguna"],c:2,e:"7 pasos de Osborn: <b>Orientación → Preparación → Análisis → Ideación → Incubación → Síntesis → Evaluación</b>."},
+{id:10,t:"T8",s:"docx",q:"¿Cuáles son los criterios generales de la comunicación publicitaria?",o:["Deben ser relevantes, originales y ricas para generar nuevas variaciones","Deben ser analíticas y relevantes","Deben ser originales y orientadas","Ninguna de las anteriores"],c:0,e:"Las ideas publicitarias deben ser: <b>relevantes</b> para el contexto, <b>originales</b> (generar sorpresa) y <b>ricas</b> (generar variaciones a lo largo de la vida del anuncio)."},
+{id:11,t:"T8",s:"docx",q:"Pautas para fomentar el pensamiento creativo (HanleyNorins):",o:["Establecer metas altas, dar incentivos, renovar la organización y formar continuamente a los empleados","Incentivos, metas a corto plazo y variar enfoques","Enfoque abierto, metas imposibles y formación","Ninguna es correcta"],c:0,e:"4 pautas: <b>1) Metas altas, 2) Incentivos para trabajo creativo, 3) Renovar organización y enfoque, 4) Formación continua</b>."},
+{id:12,t:"T8",s:"docx",q:"¿Para qué sirve utilizar el pathos?",o:["Establece confianza a través de la experiencia de la empresa","Conecta emocionalmente, mostrando miedo o mala experiencia y ofreciendo solución","Ofrece hechos para convencer al consumidor","Ninguna de las anteriores"],c:1,e:"<b>Pathos</b> conecta <b>emocionalmente</b>. La clave es mostrar un elemento de dolor/miedo/mala experiencia y ofrecer una solución."},
+{id:13,t:"T8",s:"docx",q:"¿Para qué sirve la superposición?",o:["Técnica analítico-sintética que transforma códigos verbales en representación gráfica de ideas","Técnica que conecta objetos, formas y conceptos sin relación aparente pero cuyas características se pueden extender","Provocado por el publicista con elementos aleatorios para asociación de ideas","Ninguna"],c:1,e:"La <b>Superposición</b> conecta objetos, formas y conceptos que teóricamente no tienen relación, pero cuyas características pueden extenderse de unos a otros."},
+// T8 KAHOOT
+{id:14,t:"T8",s:"kah",q:"¿Qué pensamiento genera varias soluciones posibles ante un problema?",o:["Convergente","Divergente","Analítico","Lineal"],c:1,e:"El <b>pensamiento divergente</b> es abierto y genera varias soluciones posibles. El convergente busca una única solución correcta."},
+{id:15,t:"T8",s:"kah",q:"¿Qué enfoque asociativo relaciona ideas por similitud?",o:["Unidad","Serendipia","Semejanza","Mediación"],c:2,e:"La <b>Semejanza</b> se basa en la similitud de los elementos asociativos o de los estímulos que los provocan."},
+{id:16,t:"T8",s:"kah",q:"¿Qué pensamiento reduce opciones hasta una única solución lógica?",o:["Convergente","Divergente","Emergente","Efervescente"],c:0,e:"El <b>pensamiento convergente</b> comienza con hechos recopilados y reduce el campo tratando de eliminar todas las posibilidades excepto una usando la lógica."},
+{id:17,t:"T8",s:"kah",q:"¿Qué enfoque se apoya en la casualidad y estímulos contiguos?",o:["Mediación","Semejanza","Unidad","Serendipia"],c:3,e:"La <b>Serendipia</b> se evoca mediante un proceso de apariencia ambiental contigua, generalmente una contigüidad accidental. Es la 'casualidad creativa'."},
+{id:18,t:"T8",s:"kah",q:"¿Qué es creatividad en publicidad?",o:["Evitar riesgos","Repetir fórmulas","Producir ideas originales","Copiar anuncios"],c:2,e:"La creatividad es la <b>capacidad de producir ideas originales</b> o formas de ver las ideas existentes. También puede definirse como establecer conexiones entre ideas no relacionadas."},
+{id:19,t:"T8",s:"kah",q:"¿Qué estilo usa ventajas y datos frente a la competencia?",o:["Racional","Emocional","Humorístico","Fantasía"],c:0,e:"El estilo <b>racional</b> usa argumentos obtenidos de las ventajas que posee el producto frente a la competencia, resaltando novedades y diferencias."},
+{id:20,t:"T8",s:"kah",q:"¿Qué apelación emocional usa temores básicos del consumidor?",o:["Atractivo social","Llamamiento al miedo","Atractivo musical","Porción de vida"],c:1,e:"El <b>llamamiento al miedo</b> se enfoca en las necesidades individuales basadas en temores básicos como el miedo a la pérdida de salud, seguridad y belleza."},
+{id:21,t:"T8",s:"kah",q:"¿Qué técnica transforma ideas verbales en códigos gráficos?",o:["Serendipia","Biónica","Semejanza","Ideogramación"],c:3,e:"La <b>Ideogramación</b> es una técnica analítico-sintética que tiene su eje en la transformación de los códigos verbales e ideográficos mediante la representación gráfica de las ideas."},
+// T8 REPASO (general Kahoot 8-15)
+{id:22,t:"T8",s:"rep",q:"[Repaso general] La creatividad de estilo emocional:",o:["Utiliza argumentos de las ventajas que posee el producto","Influye sobre el compromiso del usuario con el producto, servicio o marca","Tiene como objetivo explotar las necesidades económicas del individuo","Utiliza argumentos de las ventajas obtenidas tras la compra del producto"],c:1,e:"El estilo emocional <b>influye sobre el compromiso del usuario</b> con el producto, servicio o marca."},
+{id:23,t:"T8",s:"rep",q:"[Repaso general] En el pensamiento divergente:",o:["Trata de eliminar todas las posibilidades de solución excepto una","Algunos problemas pueden resolverse mediante un único camino","Algunos problemas pueden resolverse mediante varios caminos","Usa la lógica más que la creatividad"],c:2,e:"El pensamiento divergente cree que algunos problemas pueden resolverse mediante <b>varios caminos</b> y tiene más de una respuesta."},
+{id:24,t:"T8",s:"rep",q:"[Repaso general] ¿Qué estilo creativo busca influir en la implicación emocional del consumidor?",o:["Racional","Emocional","Informativo","Técnico"],c:1,e:"El estilo <b>Emocional</b> influye sobre el compromiso del usuario con el producto, servicio o marca."},
+
+// ── T9 EXAMEN (docx) ────────────────────────────────────────────────
+{id:25,t:"T9",s:"docx",q:"¿Qué concepto define la propuesta que diferencia un producto de su competencia?",o:["Copy Strategy","KPI","USP","Insight"],c:2,e:"La <b>USP (Unique Selling Proposition)</b>: propuesta única de venta, lo que hace al producto diferente dentro del mercado."},
+{id:26,t:"T9",s:"docx",q:"La Star Strategy…",o:["Se basa en el uso de influencers en las campañas","El mensaje debe centrarse en la personalidad de la marca","Se basa en definir los elementos por los que el consumidor prefiere comprar","Solo se aplica en productos de lujo"],c:1,e:"La <b>Star Strategy</b> centra el mensaje en la <b>personalidad de la marca</b>, no en un único valor físico o psicológico del producto."},
+{id:27,t:"T9",s:"docx",q:"La Copy Strategy debe tener en cuenta tres puntos clave:",o:["Producto, público objetivo y estrategia de precios","El estilo y el público","El público, el beneficio básico y la creencia y entrega","Ninguna de las anteriores"],c:2,e:"3 puntos clave de Copy Strategy: <b>Público</b> (a quién va), <b>Beneficio básico</b> (qué lo diferencia) y <b>Creencia y entrega</b> (por qué creerlo)."},
+{id:28,t:"T9",s:"docx",q:"El papel del director creativo…",o:["Responsabilidad de que toda la campaña tenga la mejor calidad final","Posee labores de dirección puramente creativa y de gestión empresarial","Ayudar a diseñar la experiencia en línea","Ninguna es correcta"],c:1,e:"El director creativo tiene <b>labores de dirección creativa Y de gestión empresarial</b>. Centra al equipo en las necesidades del cliente."},
+{id:29,t:"T9",s:"docx",q:"¿Cuáles son los puestos más comunes en el departamento creativo?",o:["Directores creativos, redactores, directores de arte y periodista","Directores creativos, redactores, directores de arte, diseñadores, desarrolladores web, responsables de producción y guionistas gráficos","Las dos son correctas","Ninguna"],c:1,e:"Puestos comunes: <b>Director creativo, Redactores, Directores de arte, Diseñadores, Desarrolladores web, Responsables de producción y Guionistas gráficos</b>."},
+{id:30,t:"T9",s:"docx",q:"La dimensión persuasiva Ethos:",o:["Apela a la autoridad, confianza o credibilidad","Apela a la lógica y la razón","Apela a la emoción","Apela al compromiso"],c:0,e:"<b>Ethos</b> = autoridad/confianza/credibilidad. <b>Pathos</b> = emoción. <b>Logos</b> = lógica/razón."},
+{id:31,t:"T9",s:"docx",q:"¿Qué ofrece el logos?",o:["Apela a la emoción","Establece un nivel de confianza a través de la experiencia de la empresa","Apela a la razón de la audiencia","Ninguna de las anteriores"],c:2,e:"<b>Logos</b> apela a la <b>lógica y la razón</b>: ofrece hechos que convencen de forma racional."},
+{id:32,t:"T9",s:"docx",q:"¿Cuáles son las áreas claves al crear la USP?",o:["Tener en cuenta el público objetivo y el producto","Estrategia de precios, servicio y producto","Tener en cuenta el producto y el público objetivo","Ninguna es correcta"],c:1,e:"Las claves al crear la USP: <b>estrategia de precios, servicio y producto</b>. Hay que destacar lo que diferencia al producto en el mercado."},
+{id:33,t:"T9",s:"docx",q:"Algunas características del sujeto creativo:",o:["Alto nivel intelectual, sensibilidad, motivación y mediación","Creatividad, mediación y tenacidad","Motivación, sensibilidad, flexibilidad intelectual, independencia de juicio y pensamiento no convencional","Ninguna"],c:2,e:"El sujeto creativo: <b>motivación, sensibilidad, flexibilidad, alto nivel intelectual, independencia de juicio, pensamiento no convencional, tenacidad y creatividad</b>."},
+// T9 KAHOOT
+{id:34,t:"T9",s:"kah",q:"¿Qué puesto redacta anuncios, publicidad online y campañas integradas?",o:["Director de arte","Diseñador","Copywriter","Desarrollador web"],c:2,e:"El <b>copywriter (redactor)</b> trabaja en anuncios, publicidad en línea y campañas integradas completas."},
+{id:35,t:"T9",s:"kah",q:"¿Qué estrategia centra el mensaje en la personalidad de marca?",o:["Copy Strategy","USP","Redactor Choice","Star Strategy"],c:3,e:"La <b>Star Strategy</b> centra el mensaje en la personalidad de la marca, no en un único valor físico o psicológico."},
+{id:36,t:"T9",s:"kah",q:"¿Qué profesional desarrolla el aspecto visual de una campaña?",o:["Redactor","Director de arte","Diseñador industrial","Fotógrafo"],c:1,e:"El <b>Director de arte</b> trabaja junto a redactores y diseñadores para idear la campaña; su trabajo es tanto artístico (diseño visual) como de redactor."},
+{id:37,t:"T9",s:"kah",q:"¿Qué estrategia destaca una característica única del producto?",o:["USP","Copy Strategy","Star Strategy","Brand Story"],c:0,e:"La <b>USP</b> destaca un único valor del producto que lo diferencia de su competencia y resalta los beneficios para los clientes."},
+{id:38,t:"T9",s:"kah",q:"¿Quién centra al equipo creativo en las necesidades del cliente?",o:["Copywriter","Director creativo","Director financiero","Community manager"],c:1,e:"El <b>director creativo</b> centra al equipo creativo en las necesidades que marcan los clientes, cumpliendo con plazos y briefings."},
+{id:39,t:"T9",s:"kah",q:"¿Qué estrategia define promesa, justificación y tono del mensaje?",o:["Star Strategy","USP","Biónica","Copy Strategy"],c:3,e:"La <b>Copy Strategy</b> define los elementos por los que el consumidor prefiere comprar: público, beneficio básico y creencia/entrega."},
+{id:40,t:"T9",s:"kah",q:"¿Qué perfil concreta ideas con herramientas de diseño gráfico?",o:["Diseñador","Redactor","Ejecutivo de cuentas","Planificador de medios"],c:0,e:"Los <b>diseñadores</b> concretan todas las ideas aportadas por directores creativos y de arte, con conocimiento absoluto de herramientas de diseño gráfico."},
+{id:41,t:"T9",s:"kah",q:"¿Qué dimensión busca cambiar actitudes y conductas del público?",o:["Dimensión técnica","Dimensión estética","Dimensión persuasiva","Dimensión legal"],c:2,e:"La <b>dimensión persuasiva</b> de la comunicación busca cambiar actitudes y conductas del público mediante ethos, pathos y logos."},
+// T9 REPASO
+{id:42,t:"T9",s:"rep",q:"[Repaso general] ¿Qué concepto define la propuesta que diferencia un producto de su competencia?",o:["Copy Strategy","KPI","USP","Insight"],c:2,e:"La <b>USP</b> (Unique Selling Proposition) es la propuesta única de venta que hace a ese producto diferente dentro del mercado."},
+
+// ── T10 EXAMEN (docx) ────────────────────────────────────────────────
+{id:43,t:"T10",s:"docx",q:"¿Qué término engloba la gestión de la marca en entornos digitales?",o:["SEO","SMO","Digital Branding","SEM"],c:2,e:"<b>Digital Branding</b> busca cuidar y fortalecer la huella digital de cualquier empresa, institución o persona en la red."},
+{id:44,t:"T10",s:"docx",q:"¿En qué se diferencian unos sitios web de otros?",o:["Una fuerte identidad corporativa que resuene con su audiencia y genere un impacto emocional","En vender productos distintos","En la estructura de la web","Ninguna"],c:0,e:"Lo que diferencia sitios web similares es una <b>fuerte identidad de marca</b> que resuene con la audiencia y genere un impacto emocional."},
+{id:45,t:"T10",s:"docx",q:"¿Qué aspectos entran en juego al diseñar una web?",o:["El contenido, los colores y los lemas","El lema, la tipografía y los tonos","El logo, la tipografía y los colores","Ninguna"],c:2,e:"Los 3 aspectos clave al diseñar una web con identidad de marca son: <b>Logo, Tipografía y Colores</b>."},
+{id:46,t:"T10",s:"docx",q:"Crear una apariencia de marca consistente…",o:["Tanto en línea como fuera de línea","Solo en línea","Solo fuera de línea","Ninguna"],c:0,e:"La marca debe ser consistente <b>tanto en línea como fuera de línea</b>."},
+{id:47,t:"T10",s:"docx",q:"¿En qué destaca la generación millennial?",o:["Son confiados y receptivos a la tecnología, con estilo de vida orientado al disfrute del tiempo libre","Tienen una capacidad de gasto interesante","Son compradores arriesgados completamente seguros en el entorno digital","Ninguna"],c:0,e:"<b>Millennials</b> (nacidos 1979-1994): confiados, receptivos a la tecnología, disfrutan el tiempo libre, pauta de consumo hedónica."},
+{id:48,t:"T10",s:"docx",q:"La generación silenciosa:",o:["Segmento conservador preocupado por su futuro inmediato","Se relaciona con el mundo mediante redes sociales","Tiene patrimonio consolidado y disfruta de la situación de retiro para viajar","Se han adaptado rápido a los canales online"],c:2,e:"<b>Generación silenciosa</b> (nacidos antes de 1945): patrimonio consolidado, en retiro, pueden viajar. Son desconfiados y conservadores. Uso internet: 44%."},
+{id:49,t:"T10",s:"docx",q:"¿Para qué sirven los mapas del sitio (sitemap)?",o:["La estructura de las redes sociales","La estructura de las presencias web, incluidos todos los directorios y subpáginas","La estructura del diseño gráfico","Ninguna"],c:1,e:"El <b>mapa del sitio</b> representa la estructura de la presencia web, incluidos todos los directorios y subpáginas."},
+{id:50,t:"T10",s:"docx",q:"Haremos un site map XML si lo orientamos a:",o:["Los motores de búsqueda","Los usuarios del site","Proveedores externos","Nuestros trabajadores"],c:0,e:"El <b>sitemap XML</b> está orientado principalmente a los <b>motores de búsqueda</b>. El HTML está orientado a los usuarios del site."},
+{id:51,t:"T10",s:"docx",q:"¿Qué factores hay que tener en cuenta para la gestión del catálogo de productos online?",o:["Actualización constante, evitar rupturas de stock, homogeneizar pedidos y cuidar atención al cliente","Imitar al catálogo físico, evitar rupturas y cuidar atención","No hay que tener en cuenta las existencias, cuidar atención y evitar facturas duplicadas","Ninguna"],c:0,e:"Gestión catálogo online: <b>actualización constante, evitar rupturas de stock, homogeneizar sistemas de pedidos, evitar duplicación de facturas, fotografiar y cuidar la atención al cliente</b>."},
+{id:52,t:"T10",s:"docx",q:"Es más fácil y menos costoso…",o:["Aumentar la visibilidad por medios tradicionales que digitales","Aumentar la visibilidad de la marca digital que construir una marca por medios tradicionales","Las dos son correctas","Ninguna"],c:1,e:"La <b>creación de marca digital</b> es más fácil, menos costosa y más escalable que construir una marca por medios tradicionales."},
+{id:53,t:"T10",s:"docx",q:"¿Qué distingue una empresa de sus competidores?",o:["Los valores diferenciales","El posicionamiento de marca","Todas las anteriores","Ninguna"],c:2,e:"<b>Tanto los valores diferenciales como el posicionamiento de marca</b> distinguen a una empresa de sus competidores."},
+// T10 KAHOOT
+{id:54,t:"T10",s:"kah",q:"¿Qué generación nació entre 1979 y 1994 y usa mucho internet?",o:["Baby boomers","Generación silenciosa","Generación X","Generación milenial"],c:3,e:"La <b>Generación Milenial</b> nació entre 1979 y 1994. Su tasa de uso de internet es muy alta (por encima del 80%)."},
+{id:55,t:"T10",s:"kah",q:"¿Qué sitemap facilita la indexación a motores de búsqueda?",o:["XML","HTML","CSS","JSON"],c:0,e:"El <b>sitemap XML</b> está orientado principalmente a los motores de búsqueda, proporcionándoles datos adicionales sobre el sitio web."},
+{id:56,t:"T10",s:"kah",q:"¿Qué segmento nació entre 1965 y 1978 y tiene alto gasto online?",o:["Baby boomers","Generación silenciosa","Generación X","Generación milenial"],c:2,e:"La <b>Generación X</b> (nacidos 1965-1978) tiene una tasa de uso de internet del 73%. De perfil más arriesgado, tienen una capacidad de gasto muy interesante."},
+{id:57,t:"T10",s:"kah",q:"¿Qué mapa del sitio debe estar visible para los visitantes?",o:["XML","HTML","CSS","JSON"],c:1,e:"El <b>sitemap HTML</b> está orientado a los usuarios/visitantes del sitio. Les permite navegar de un sitio a otro fácilmente."},
+{id:58,t:"T10",s:"kah",q:"¿Qué contiene un mapa del sitio?",o:["Solo imágenes","Solo metadatos","Páginas y URL jerarquizadas","Contraseñas web"],c:2,e:"Un mapa del sitio contiene todos los documentos (páginas web) de un sitio web y los presenta <b>jerárquicamente</b>, junto con las URL correspondientes."},
+{id:59,t:"T10",s:"kah",q:"¿Dónde puede enviarse un sitemap XML para ayudar al buscador?",o:["WordPress","Google Search Console","Photoshop","Red social"],c:1,e:"Si se crea un sitemap XML, se puede enviar a <b>Google Search Console</b>, lo que permite al motor de búsqueda obtener mejor comprensión del sitio web."},
+{id:60,t:"T10",s:"kah",q:"¿Qué elemento forma parte de la identidad corporativa en web?",o:["Logotipo","Servidor DNS","Código PHP","Cookie técnica"],c:0,e:"La identidad corporativa incluye: <b>logotipo</b>, lema, eslogan, tipografía, embalaje y contenido. El logotipo debe ser prominente pero no devorar a la marca."},
+{id:61,t:"T10",s:"kah",q:"¿Qué targets interesan para gadgets baratos online?",o:["Solo seniors","Baby boomers","Generación silenciosa","Gen Z y milenials"],c:3,e:"Para gadgets de bajo precio online interesan: <b>Generación Z</b> (nativos digitales, fanáticos de la tecnología) y <b>Millennials</b> (conocimiento digital, mayor poder adquisitivo)."},
+// T10 REPASO
+{id:62,t:"T10",s:"rep",q:"[Repaso general] ¿Qué término engloba la gestión de la marca en entornos digitales?",o:["SEO","SMO","Digital Branding","SEM"],c:2,e:"<b>Digital Branding</b> es el concepto amplio que busca cuidar y fortalecer la huella digital de cualquier empresa en internet."},
+
+// ── T11 EXAMEN (docx) ────────────────────────────────────────────────
+{id:63,t:"T11",s:"docx",q:"¿Qué siglas se refieren a la optimización de la presencia en redes sociales para mejorar el tráfico y las conversiones?",o:["SEO","SEM","SMM","SMO"],c:3,e:"<b>SMO (Social Media Optimization)</b> = acciones en un sitio web para mejorar el tráfico y las conversiones. <b>SMM</b> = estrategia global en redes sociales."},
+{id:64,t:"T11",s:"docx",q:"¿Cuál es una de las principales ventajas de Facebook?",o:["Se puede configurar una tienda directamente en el sitio","Se basa en publicaciones breves","Su publicidad es simple, elegante y perfecta","Ninguna"],c:0,e:"Una ventaja clave de <b>Facebook</b>: se puede configurar una <b>tienda directamente en el sitio</b>, sin que los usuarios tengan que abandonar la página."},
+{id:65,t:"T11",s:"docx",q:"¿En qué red social las stories son excelentes para captar la atención?",o:["Instagram","Twitter","Facebook","Ninguna"],c:0,e:"Las <b>Instagram Stories</b> son excelentes para captar la atención, especialmente con obsequios o lanzamientos de productos."},
+{id:66,t:"T11",s:"docx",q:"La efectividad publicitaria de los banners mejora gracias a…",o:["Comprensión de métricas, conocimiento de redes, reglas de diseño y del público objetivo","Conocimiento del posicionamiento y métricas del banner","Conocimiento de beneficios de redes sociales y posicionamiento","Ninguna"],c:0,e:"La efectividad mejora gracias a: <b>comprensión de métricas del banner, conocimiento de redes publicitarias, reglas de diseño y conocimiento del público objetivo</b>."},
+{id:67,t:"T11",s:"docx",q:"En el pago por click…",o:["La contratación se realiza por un determinado número de clicks en el banner","La contratación se realiza por un número determinado de impresiones","Las dos son correctas","Ninguna"],c:0,e:"El <b>pago por clic (PPC)</b>: contratación por número de clics en el banner. El <b>pago por impresión (PPI)</b>: por apariciones en pantalla."},
+{id:68,t:"T11",s:"docx",q:"La animación es:",o:["La visualización rápida de una secuencia de imágenes en 2D para crear una ilusión de movimiento","La edición rápida de una secuencia de imágenes en 2D","La activación de gráficos para crear el movimiento","La grabación rápida de imágenes en 3D"],c:0,e:"La <b>animación</b> es la visualización rápida de una secuencia de imágenes en 2D para crear una <b>ilusión de movimiento</b> (persistencia de la visión)."},
+{id:69,t:"T11",s:"docx",q:"¿Qué es fundamental para obtener el máximo rendimiento de una grabación?",o:["El número de fotogramas por segundo","La reducción del ruido","Una buena gestión de archivos","Ninguna"],c:2,e:"Una <b>buena gestión de archivos</b> es fundamental. Las pistas de sonido deben agruparse por tipos (efectos, ruido de fondo, pistas auxiliares)."},
+{id:70,t:"T11",s:"docx",q:"¿Cuántos fotogramas por segundo son recomendables para el trabajo cinematográfico?",o:["25 FPS","24 FPS","48 FPS","Ninguna"],c:1,e:"<b>24 FPS</b> para cine, <b>25 FPS</b> para TV europea, <b>29,97 FPS</b> para TV estadounidense. 48/50/60 FPS son para cámara de acción."},
+// T11 KAHOOT
+{id:71,t:"T11",s:"kah",q:"¿Qué significa Social Media Marketing (SMM)?",o:["Marketing en redes sociales","SEM","Email marketing","Afiliación"],c:0,e:"<b>SMM (Social Media Marketing)</b> se refiere a la estrategia global en torno a las redes sociales en todo internet."},
+{id:72,t:"T11",s:"kah",q:"La edición de sonido pertenece a la fase de…",o:["Producción de vídeo","Postproducción de vídeo","Refracción de vídeo","Contratación de vídeo"],c:1,e:"La edición de sonido es parte de la <b>postproducción</b>: se ensamblan las pistas de audio, se elimina ruido no deseado y se crean efectos de sonido."},
+{id:73,t:"T11",s:"kah",q:"¿Qué concepto se refiere a la optimización en redes sociales?",o:["SMM","SMO","SEM","SEO"],c:1,e:"<b>SMO (Social Media Optimization)</b>: acciones en un determinado sitio web para mejorar el tráfico y las conversiones."},
+{id:74,t:"T11",s:"kah",q:"¿Qué tarea ajusta niveles de audio de todas las pistas?",o:["Edición de vídeo","Corrección de color","Mezcla de sonido","Animación gráfica"],c:2,e:"La <b>mezcla de sonido</b> interviene cuando todas las pistas de audio están terminadas para ajustar los niveles de audio."},
+{id:75,t:"T11",s:"kah",q:"¿Cómo se llaman los anuncios publicitarios en internet?",o:["Flyers","Mupis","Folletos","Banners"],c:3,e:"Los anuncios publicitarios en internet se conocen como <b>banners</b>: cajas rectangulares en las partes superiores de las páginas web."},
+{id:76,t:"T11",s:"kah",q:"¿Qué implica el pago por clic en banners?",o:["Se paga cuando hay clic","Se paga por folleto","Se paga por imprenta","Se paga por minuto"],c:0,e:"El <b>pago por clic</b>: la contratación se realiza por un determinado número de clics en el banner que llevan a la web destino."},
+{id:77,t:"T11",s:"kah",q:"¿Qué red es especialmente visual y útil para imagen de producto?",o:["LinkedIn","Twitter","Bing","Instagram"],c:3,e:"<b>Instagram</b> es la plataforma elegida para el marketing de influencers y para imagen de producto. Su publicidad es nativa, simple, elegante y perfecta."},
+{id:78,t:"T11",s:"kah",q:"¿Qué combina la animación multimedia interactiva?",o:["Solo texto","Solo audio","Imagen, sonido e interacción","Solo impresión"],c:2,e:"La animación multimedia interactiva combina <b>imagen, sonido e interacción</b>. Hace que las presentaciones estáticas cobren vida."},
+// T11 REPASO
+{id:79,t:"T11",s:"rep",q:"[Repaso general] ¿Qué siglas se refieren a la optimización de la presencia en redes sociales para mejorar el tráfico y las conversiones?",o:["SEO","SEM","SMM","SMO"],c:3,e:"<b>SMO</b> = optimización en redes sociales para mejorar tráfico y conversiones. <b>SMM</b> = estrategia global en redes sociales en todo internet."},
+{id:80,t:"T11",s:"rep",q:"[Repaso general] ¿En qué fase del proceso audiovisual se edita el sonido y la imagen?",o:["Preproducción","Producción","Postproducción","Distribución"],c:2,e:"La <b>postproducción</b> es la fase donde se edita el sonido y la imagen, se añaden efectos visuales, música y corrección de color."},
+
+// ── T12 EXAMEN (docx) ────────────────────────────────────────────────
+{id:81,t:"T12",s:"docx",q:"¿Para qué sirve el hipertexto?",o:["Es una estructura que organiza la información de la World Wide Web","Para captar la atención de los usuarios","Las dos son correctas","Ninguna"],c:0,e:"El <b>hipertexto</b> es el concepto subyacente que define la estructura de la World Wide Web, mediante páginas interconectadas por hipervínculos."},
+{id:82,t:"T12",s:"docx",q:"El hipertexto puede…",o:["Almacenarse, leerse, buscarse o editarse","Solo almacenarse o leerse","Solo editarse","Solo buscarse"],c:0,e:"El hipertexto puede <b>almacenarse, leerse, buscarse o editarse</b>, con el matiz de que apunta a otro texto hasta crear una red (internet)."},
+{id:83,t:"T12",s:"docx",q:"¿Cuál es la razón número uno para acortar un enlace?",o:["Aumentar el tráfico a la web","Personalizar la URL","El seguimiento de enlaces","Ninguna"],c:2,e:"El <b>seguimiento de enlaces</b> debe ser la razón número uno para acortar un enlace. Herramientas: bit.ly y snip.ly."},
+{id:84,t:"T12",s:"docx",q:"¿Qué son los archivos PDF?",o:["Son más que imágenes de documentos: pueden incrustar fuentes tipográficas e incluir elementos interactivos","Es un formato que utiliza animaciones","Formato para comprimir imágenes en color","Ninguna"],c:0,e:"Los <b>PDF</b> son más que imágenes: pueden incrustar fuentes tipográficas, botones, sonidos, vídeos y enlaces de hipertexto."},
+{id:85,t:"T12",s:"docx",q:"¿Qué características tiene el formato GIF?",o:["Utiliza compresión sin pérdida, la imagen no pierde calidad aunque se comprima","Utiliza compresión con pérdida","Su capacidad de compresión es de mayor calidad","Ninguna"],c:0,e:"El <b>GIF</b> usa <b>compresión sin pérdida</b>: la imagen no pierde calidad. Se usa generalmente para animaciones."},
+{id:86,t:"T12",s:"docx",q:"¿Qué permite el PNG?",o:["La transparencia alfa","Hacer animaciones","Comprimir imágenes en color","Ninguna"],c:0,e:"El <b>PNG</b> permite la <b>transparencia alfa</b>: crear imágenes con fondo transparente (parcial o total). NO admite animaciones."},
+{id:87,t:"T12",s:"docx",q:"¿Cuáles son los tipos de gráficos digitales?",o:["Solo gráficos vectoriales","Mapa de bits y gráficos vectoriales","Solo mapa de bits","Ninguna"],c:1,e:"Dos tipos: <b>Mapa de bits</b> (JPG, GIF, PNG - compuestos por píxeles) y <b>Gráficos vectoriales</b> (basados en fórmulas matemáticas, sin compresión)."},
+{id:88,t:"T12",s:"docx",q:"Las fuentes Serif…",o:["Son mejor opción para materiales físicos impresos","Son preferidas para elementos más pequeños","No son recomendables para materiales físicos impresos","Ninguna"],c:0,e:"Las fuentes <b>Serif</b> se prefieren para <b>cuerpos de texto grandes en materiales físicos impresos</b>. Las Sans Serif son preferidas para elementos pequeños y digitales."},
+{id:89,t:"T12",s:"docx",q:"¿Para qué sirve el blog?",o:["Para posicionar la web en buscadores","Para impactar en una presentación multimedia","Para mejorar la calidad del sonido","Ninguna"],c:0,e:"El <b>blog</b> sirve para <b>posicionar la web en buscadores</b> (SEO). El canal de vídeo (vlog) sirve para establecer imagen de marca."},
+{id:90,t:"T12",s:"docx",q:"¿Qué formato de audio destaca por su pequeño tamaño y compresión?",o:["WAV","AIFF","MP3","FLAC"],c:2,e:"El <b>MP3</b> es el formato de audio estándar. Su principal ventaja es su <b>pequeño tamaño</b> (no contiene secciones inaudibles)."},
+// T12 KAHOOT
+{id:91,t:"T12",s:"kah",q:"¿Qué fuente carece de remates o serifas?",o:["Serif","Sans Serif","Script","Decorativa"],c:1,e:"Las fuentes <b>Sans Serif</b> (también llamadas 'palo seco') carecen de remates o serifas. Ejemplos: Arial, Helvetica, Avant Garde."},
+{id:92,t:"T12",s:"kah",q:"¿Qué audio comprimido estándar destaca por su pequeño tamaño?",o:["MP3","WAV","AIFF","FLAC"],c:0,e:"El <b>MP3</b> es el tipo de archivo de audio estándar en la mayoría de dispositivos y sitios web. Su ventaja es su pequeño tamaño."},
+{id:93,t:"T12",s:"kah",q:"¿Qué formato de imagen permite transparencia alfa?",o:["JPEG","TIFF","GIF","PNG"],c:3,e:"El <b>PNG</b> permite la transparencia alfa: crear imágenes con fondo transparente (parcial o total). Tiene mayor capacidad de compresión que el GIF."},
+{id:94,t:"T12",s:"kah",q:"¿Qué tipografía tiene remates en los extremos de los trazos?",o:["Sans Serif","Script","Serif","Display"],c:2,e:"Las fuentes <b>Serif</b> tienen líneas pequeñas o serifas en la parte inferior de las letras. Se prefieren para textos largos en papel impreso."},
+{id:95,t:"T12",s:"kah",q:"¿Qué se recomienda al elegir fuentes para una presentación?",o:["Cambiar en cada diapositiva","Usar muchas fuentes","Solo manuscritas","Usar la misma familia"],c:3,e:"Se recomienda usar la <b>misma familia de fuentes</b> en toda la presentación y no usar más de dos fuentes complementarias."},
+{id:96,t:"T12",s:"kah",q:"¿Qué formato de audio es sin compresión y de alta calidad?",o:["WAV","MP3","AAC","OGG"],c:0,e:"Los archivos <b>WAV</b> no están comprimidos, por lo que ocupan gran cantidad de espacio, pero son de mejor calidad que la mayoría de los MP3."},
+{id:97,t:"T12",s:"kah",q:"¿Qué imagen usa compresión con pérdida y es común en fotos?",o:["PNG","JPEG","TIFF","GIF"],c:1,e:"El <b>JPEG</b> usa compresión con pérdida: disminuye el tamaño del archivo consiguiendo una ligera disminución en la calidad. Muy usado en fotos de cámaras y móviles."},
+{id:98,t:"T12",s:"kah",q:"¿Qué ventaja principal tiene el formato PDF?",o:["Pierde tipografías","Solo sirve para audio","Conserva el formato","No se puede compartir"],c:2,e:"El <b>PDF</b> conserva el formato y puede incrustar fuentes tipográficas disponibles en cualquier lugar de visualización, sin que el receptor tenga la fuente instalada."},
+// T12 REPASO
+{id:99,t:"T12",s:"rep",q:"[Repaso general] ¿Qué tipo de fuente tipográfica facilita la lectura en textos largos impresos?",o:["Script","Display","Sans Serif","Serif"],c:3,e:"Las fuentes <b>Serif</b> se prefieren para cuerpos de texto grandes, especialmente en materiales físicos impresos."},
+{id:100,t:"T12",s:"rep",q:"[Repaso general] ¿Qué formato de audio destaca por su pequeño tamaño y compresión?",o:["WAV","AIFF","MP3","FLAC"],c:2,e:"El <b>MP3</b> se ha convertido en el tipo de archivo de audio estándar en la mayoría de dispositivos y sitios web, gracias a su pequeño tamaño."},
+{id:101,t:"T12",s:"rep",q:"[Repaso general] Una 'edición no destructiva' quiere decir:",o:["Aplica edición y se hace una copia de la segunda modificación","Aplica edición pero se guarda la primera modificación","Se hacen muchas copias","Aplica algún tipo de edición, pero se mantiene una copia del original"],c:3,e:"La <b>edición no destructiva</b> (como en Lightroom): aplica edición pero se mantiene una copia del original intacto. Los cambios se guardan en un archivo 'catálogo' separado."},
+
+// ── T13 EXAMEN (docx) ────────────────────────────────────────────────
+{id:102,t:"T13",s:"docx",q:"¿Cuál es la etapa que recoge todo lo que sucede antes del proceso de grabación?",o:["Preproducción","Producción","Postproducción","Ninguna"],c:0,e:"La <b>preproducción</b> comienza con el desarrollo del guión y la preparación del rodaje. Involucra todo lo que sucede ANTES de grabar."},
+{id:103,t:"T13",s:"docx",q:"El casting de actores se realiza en la etapa de:",o:["Producción","Postproducción","Preproducción","Edición"],c:2,e:"El <b>casting</b> se realiza en la etapa de <b>preproducción</b>, junto con el presupuesto, guión, storyboard y búsqueda de localizaciones."},
+{id:104,t:"T13",s:"docx",q:"Algunas tareas de la preproducción…",o:["Presupuesto del proyecto, desarrollo del guion y storyboard, búsqueda de localizaciones y casting","Desarrollo del guion, conceptos gráficos, lluvia de ideas y casting","Las dos son correctas","Ninguna"],c:0,e:"Tareas de preproducción: <b>Presupuesto, horario de producción, guión y storyboard, conceptos gráficos, localizaciones y permisos, vestuario, casting, preparación de postproducción</b>."},
+{id:105,t:"T13",s:"docx",q:"¿En qué fase del proceso audiovisual se edita el sonido y la imagen?",o:["Preproducción","Producción","Postproducción","Distribución"],c:2,e:"La <b>postproducción</b> es donde se ensambla el material grabado: edición de vídeo y sonido, música, efectos visuales, corrección de color."},
+{id:106,t:"T13",s:"docx",q:"En la fase de corrección del color dentro de la postproducción…",o:["Se diseñan las imágenes generadas por ordenador","Se revisa primero el sonido para ensamblar las pistas","El metraje se transfiere a un sistema de edición","Un colorista revisa cada toma para ajustar y refinar digitalmente los tonos"],c:3,e:"En la <b>corrección de color</b>, cuando la imagen está 'bloqueada' (sin más cambios), un <b>colorista</b> revisa cada toma para ajustar tonos y luz, creando estados de ánimo y continuidad."},
+{id:107,t:"T13",s:"docx",q:"¿Por qué están formados los formatos de vídeo?",o:["Por imágenes","Por contenedores y códecs","Por archivos de audio","Ninguna"],c:1,e:"Los formatos de vídeo están formados por <b>contenedores</b> (estructura del archivo) y <b>códecs</b> (forma de comprimir para disminuir el tamaño manteniendo la calidad)."},
+{id:108,t:"T13",s:"docx",q:"¿Para qué se crea un guion detallado?",o:["Para complementar el tono del vídeo","Para que el director y el equipo sepan con precisión lo que se hace durante el rodaje","Para darle originalidad al contenido","Ninguna"],c:1,e:"El guión detallado existe para que el <b>director y el resto del equipo sepan con precisión</b> qué están haciendo en el rodaje."},
+{id:109,t:"T13",s:"docx",q:"¿Con qué programas de aplicaciones de presentaciones podemos hacer plantillas?",o:["PowerPoint y Google Slides","PowerPoint y Wikimedia","PowerPoint y Flickr","Ninguna"],c:0,e:"Las aplicaciones principales para presentaciones son <b>PowerPoint, Google Slides y Prezi</b>. También existen webs como envato.com o slidescarnival.com."},
+{id:110,t:"T13",s:"docx",q:"¿Qué hay que tener en cuenta con las diapositivas?",o:["Que se centren en una idea y hablar de manera natural","Que cuanto más texto mejor se entiende","Que cada diapositiva se centre en varias ideas","Ninguna"],c:0,e:"Cada diapositiva debe <b>centrarse en una sola idea</b> y no contener más de 5 líneas de texto, para hablar de manera natural."},
+{id:111,t:"T13",s:"docx",q:"El tono de una presentación…",o:["Tiene un efecto directo en las decisiones de diseño","No afecta al resultado final","Ayuda a evitar imágenes de mala calidad","Ninguna"],c:0,e:"El <b>tono</b> de la presentación tiene un <b>efecto directo en las decisiones de diseño</b>: un tema de negocios requiere un tono diferente a uno divertido."},
+{id:112,t:"T13",s:"docx",q:"Algunas de las fases del proceso de postproducción de vídeo:",o:["Edición de vídeo, edición de sonido, música, efectos visuales y mezcla de sonido","Edición de vídeo, edición de texto, música, efectos visuales y mezcla de sonido","Gráficos, ganancia, reducción de ruido y edición de texto","Ninguna"],c:0,e:"Fases de postproducción: <b>1)Edición vídeo, 2)Edición sonido, 3)Música, 4)Efectos visuales, 5)Mezcla de sonido, 6)Corrección de color, 7)Gráficos</b>."},
+{id:113,t:"T13",s:"docx",q:"¿Cuántos fotogramas por segundo son recomendables para el trabajo cinematográfico?",o:["25 FPS","24 FPS","48 FPS","Ninguna"],c:1,e:"<b>24 FPS</b> para cine, <b>25 FPS</b> para TV europea, <b>29,97 FPS</b> para TV estadounidense. 48/50/60 FPS son tasas exóticas para cámara de acción."},
+{id:114,t:"T13",s:"docx",q:"¿Para qué sirven las animaciones?",o:["Hacen que las presentaciones estáticas cobren vida","Hacen presentaciones estáticas","Se crean a partir de imágenes a tiempo real","Ninguna"],c:0,e:"Las <b>animaciones</b> hacen que las <b>presentaciones estáticas cobren vida</b> y pueden agregar gran poder a los proyectos multimedia."},
+{id:115,t:"T13",s:"docx",q:"Los gráficos de las presentaciones pueden ser…",o:["Gráficos de barras verticales, horizontales y no lineales","Gráficos circulares, de barras verticales, de barras horizontales y lineales","Gráficos de barras verticales, horizontales y cuadrados","Ninguna"],c:1,e:"Tipos de gráficos: <b>circulares</b> (porcentajes), <b>barras verticales</b> (cambios en tiempo), <b>barras horizontales</b> (comparar cantidades), <b>lineales</b> (tendencias)."},
+// T13 KAHOOT
+{id:116,t:"T13",s:"kah",q:"¿Cuáles son las fases habituales de producción de vídeo?",o:["Preproducción, producción y postproducción","Diseño, imprenta y venta","Briefing, pauta y compra","Texto, imagen y PDF"],c:0,e:"Las 3 fases de producción de vídeo son: <b>preproducción</b> (preparación), <b>producción</b> (grabación) y <b>postproducción</b> (edición y montaje)."},
+{id:117,t:"T13",s:"kah",q:"¿Qué incluye un guion audiovisual?",o:["Solo presupuesto","Narración, diálogos y descripciones","Solo enlaces","Solo mapas del sitio"],c:1,e:"El <b>guión</b> incluye la <b>narración, el diálogo y las descripciones visuales y sonoras</b> que dicen al equipo de producción qué elementos deben capturarse."},
+{id:118,t:"T13",s:"kah",q:"¿Qué ocurre en la preproducción?",o:["Mezcla final","Distribución en redes","Preparar guion y rodaje","Impresión offset"],c:2,e:"La <b>preproducción</b> comienza con el desarrollo del guión y la preparación del rodaje. Involucra todo lo que sucede antes de grabar."},
+{id:119,t:"T13",s:"kah",q:"¿Qué fase incluye edición, audio y corrección de color?",o:["Guion","Rodaje","Preproducción","Postproducción"],c:3,e:"La <b>postproducción</b> incluye la edición de vídeo y sonido, música, efectos visuales, mezcla de sonido, corrección de color y gráficos."},
+{id:120,t:"T13",s:"kah",q:"¿Qué aporta una plantilla a una presentación multimedia?",o:["Improvisación total","Diseño coherente","Más duración","Sin texto posible"],c:1,e:"Una <b>plantilla</b> aporta <b>diseño coherente</b>: tiene el formato establecido (encabezados, color, fuentes, tablas) que acelera la creación y da consistencia visual."},
+{id:121,t:"T13",s:"kah",q:"¿Qué hace un asistente en software de presentaciones?",o:["Guía la creación paso a paso","Comprime el audio","Crea un sitemap","Imprime revistas"],c:0,e:"Un <b>asistente</b> es un software que <b>simplifica tareas complejas</b> o instruye al usuario sobre cómo completarlas, guiando el proceso paso a paso."},
+{id:122,t:"T13",s:"kah",q:"¿Qué diferencia un objeto vinculado de uno incrustado?",o:["No puede verse","Es siempre imagen fija","Solo admite WAV","Depende de un archivo externo"],c:3,e:"Un objeto <b>vinculado</b> depende de un archivo externo. Si se mueve el archivo, el vínculo se rompe. Un objeto <b>incrustado</b> forma parte del archivo de presentación."},
+{id:123,t:"T13",s:"kah",q:"¿Qué mejora la eficacia de una diapositiva?",o:["Saturarla de texto","Usar muchas fuentes","Claridad visual y poco texto","Eliminar imágenes"],c:2,e:"La <b>claridad visual y poco texto</b> mejoran la eficacia de una diapositiva. Cada diapositiva debe centrarse en una sola idea."},
+
+// ── T14 EXAMEN (docx) ────────────────────────────────────────────────
+{id:124,t:"T14",s:"docx",q:"¿Cuál es el programa más recomendable para crear un folleto?",o:["Photoshop","InDesign","Illustrator","Ninguna"],c:1,e:"<b>InDesign</b> es el programa para crear folletos, revistas, periódicos, carteles y documentos de comunicación visual. Photoshop es para editar fotos."},
+{id:125,t:"T14",s:"docx",q:"¿Para qué sirve InDesign?",o:["Para crear dibujos e ilustraciones","Para crear folletos, revistas, periódicos, carteles, tarjetas de visita y otros documentos","Para la creación de gráficos vectoriales de alta calidad","Ninguna"],c:1,e:"<b>InDesign</b> es un software de <b>maquetación</b> para crear folletos, revistas, periódicos, carteles, tarjetas de visita, postales, pegatinas, cómics..."},
+{id:126,t:"T14",s:"docx",q:"¿Cuáles son los programas que se consideran de gráficos vectoriales?",o:["CorelDraw y Adobe Illustrator","Adobe Photoshop y Adobe Illustrator","Adobe Photoshop y CorelDraw","Ninguna"],c:0,e:"Los programas de <b>gráficos vectoriales</b> son <b>CorelDraw y Adobe Illustrator</b>. Los gráficos vectoriales no pierden calidad al ampliarse."},
+{id:127,t:"T14",s:"docx",q:"¿Cómo funciona Lightroom?",o:["Permite realizar todo tipo de ediciones y cambios en las imágenes","Trabaja con capas, mayor control de edición","Trabaja de una manera lineal, sin capas","Ninguna"],c:2,e:"<b>Lightroom</b> trabaja de manera <b>lineal, sin capas</b>, con menos herramientas que Photoshop. Usa 'edición no destructiva'."},
+{id:128,t:"T14",s:"docx",q:"Una 'edición no destructiva' quiere decir:",o:["Aplica edición y se hace una copia de la segunda modificación","Aplica edición pero se guarda la primera modificación","Se hacen muchas copias","Aplica edición pero se mantiene una copia del original"],c:3,e:"La <b>edición no destructiva</b>: aplica cambios pero <b>mantiene el original intacto</b>. Lightroom guarda los cambios en un archivo 'catálogo' separado."},
+{id:129,t:"T14",s:"docx",q:"¿Cuál es el sistema de administración de sitios webs y blogs más popular?",o:["WordPress","Wix","Blogspot","Ninguna"],c:0,e:"<b>WordPress</b> es el sistema de administración de sitios web y blogs más popular de internet (más de 60 millones de páginas web)."},
+{id:130,t:"T14",s:"docx",q:"Entre las utilidades de WordPress está:",o:["Diseñar folletos, flyers, catálogos…","La administración de varios sitios web","Editar imágenes para imprimir","Generar una tienda en Facebook"],c:1,e:"WordPress puede: presencia online, blog, <b>administración de varios sitios web</b>, optimización SEO y tienda online (con WooCommerce)."},
+{id:131,t:"T14",s:"docx",q:"Algunas utilidades de WordPress…",o:["Presencia online, blog, SEO y poca visibilidad","Blog, administración de sitios, tienda online y limitación de plantilla","Presencia online, blog, administración de varios sitios web, SEO y tienda online","Ninguna"],c:2,e:"Utilidades de WordPress: <b>Presencia online, Blog, Administración de varios sitios web, Optimización SEO y Tienda online</b>."},
+{id:132,t:"T14",s:"docx",q:"Algunas recomendaciones para crear un cartel son…",o:["No abusar del texto, tener en cuenta la llamada a la acción y buscar el contraste","Cuanto más texto mejor legibilidad y tener en cuenta la llamada a la acción","Las dos son correctas","Ninguna"],c:0,e:"Recomendaciones para un cartel: <b>no abusar del texto, buscar el contraste, llamada a la acción, fuentes anchas y añadir degradados para legibilidad</b>."},
+{id:133,t:"T14",s:"docx",q:"El cartel publicitario es…",o:["Una pieza de arte","Una herramienta de marketing","Un diseño simple sin objetivo","Ninguna"],c:1,e:"El <b>cartel publicitario NO es una pieza de arte</b>, es una <b>herramienta de marketing</b>. Hay que tener claro el objetivo."},
+// T14 KAHOOT
+{id:134,t:"T14",s:"kah",q:"¿Qué software es estándar para editar y manipular fotografías?",o:["Lightroom","Adobe InDesign","Adobe Photoshop","WordPress"],c:2,e:"<b>Adobe Photoshop</b> es el software de edición y manipulación de fotografías más usado del mercado."},
+{id:135,t:"T14",s:"kah",q:"¿Qué software sirve para crear flyers, revistas y libros?",o:["Lightroom","Adobe InDesign","Adobe Photoshop","WordPress"],c:1,e:"<b>Adobe InDesign</b> es un software de publicación para crear flyers, folletos, revistas, periódicos y libros."},
+{id:136,t:"T14",s:"kah",q:"¿Qué programa organiza y revela fotografías digitales?",o:["Adobe Lightroom","Adobe InDesign","WordPress","Premiere Pro"],c:0,e:"<b>Adobe Lightroom</b> es un programa de edición y organización de imágenes. Permite modificar, ajustar y mejorar fotografías de forma no destructiva."},
+{id:137,t:"T14",s:"kah",q:"¿Qué herramienta gestiona y publica contenidos en una web?",o:["Adobe Photoshop","Adobe Lightroom","Adobe InDesign","WordPress"],c:3,e:"<b>WordPress</b> es un sistema de gestión de contenido (CMS) gratuito y de código abierto, el más popular para administrar sitios web y blogs."},
+{id:138,t:"T14",s:"kah",q:"¿Qué programa es referencia para gráficos vectoriales?",o:["Adobe Illustrator","Adobe Acrobat","Final Cut Pro","PowerPoint"],c:0,e:"<b>Adobe Illustrator</b> es el más utilizado para gráficos vectoriales de alta calidad: logotipos, señalizaciones, diseño gráfico sin fotografías."},
+{id:139,t:"T14",s:"kah",q:"¿Qué diferencia a los gráficos vectoriales?",o:["No se pueden ampliar","Son escalables","Solo son de audio","Pierden siempre calidad"],c:1,e:"Los gráficos vectoriales son <b>escalables</b>: se pueden ampliar sin que, en ningún momento, haya pérdida de calidad en su resolución."},
+{id:140,t:"T14",s:"kah",q:"¿Qué sistema usa Photoshop para superponer y modificar imágenes?",o:["Plantillas web","Mapas del sitio","Capas","Calendarios"],c:2,e:"<b>Photoshop</b> utiliza un sistema de edición basado en <b>capas</b> que permite la creación y modificación de imágenes con múltiples superposiciones que admiten transparencia."},
+{id:141,t:"T14",s:"kah",q:"¿Qué es WordPress según el temario?",o:["Editor de audio","Sistema de impresión","Rasterizador","CMS gratuito y abierto"],c:3,e:"<b>WordPress</b> es un sistema de gestión de contenido (CMS) <b>gratuito y de código abierto</b>, basado en PHP y MySQL."},
+
+// ── T15 EXAMEN (docx) ────────────────────────────────────────────────
+{id:142,t:"T15",s:"docx",q:"¿En qué grupos se clasifican los objetivos publicitarios?",o:["Objetivos de información, actitudes y comportamiento","Objetivos de información y actitudes","Objetivos de comportamientos y actitudes","Ninguna"],c:0,e:"Los objetivos publicitarios se clasifican en 3 grupos: <b>1) Información (publicidad informativa), 2) Actitudes (publicidad de imagen), 3) Comportamiento</b>."},
+{id:143,t:"T15",s:"docx",q:"¿Qué buscan los objetivos de actitudes?",o:["La creación, refuerzo o modificación de las actitudes y opiniones del público objetivo","Facilitar datos sobre productos, marcas, empresas","Modificar el comportamiento de los consumidores","Ninguna"],c:0,e:"Los <b>objetivos de actitudes</b> buscan la <b>creación, refuerzo o modificación de las actitudes y opiniones</b> del público objetivo."},
+{id:144,t:"T15",s:"docx",q:"¿Qué contenidos debe incluir el presupuesto de publicidad?",o:["Los gastos de las campañas y publicidad directa","Los gastos por espacios publicitarios, inserción en internet, publicidad directa, puntos de venta, gastos técnicos y del personal del departamento","Las herramientas visuales que se utilicen","Ninguna"],c:1,e:"El presupuesto publicitario incluye: <b>espacios en medios, inserción en internet, publicidad directa y en puntos de venta, gastos técnicos (fotografías, packaging) y gastos del personal publicitario</b>."},
+{id:145,t:"T15",s:"docx",q:"¿Cuáles son los dos tipos de calendario de inserciones publicitarias?",o:["El timing global de la campaña y el timing de difusión","El guion y el timing global de la campaña","El timing de inicio y el timing de difusión","Ninguna"],c:0,e:"Existen dos tipos: <b>Timing global</b> (integra TODAS las acciones planeadas) y <b>Timing de difusión</b> (establece las apariciones en los medios de comunicación)."},
+{id:146,t:"T15",s:"docx",q:"El Timing de difusión:",o:["Es bimensual","Integra las acciones mensuales para RRSS","Integra todas las acciones que se han planeado para la campaña","Establece las apariciones en los medios de comunicación"],c:3,e:"El <b>Timing de difusión</b> establece las <b>apariciones de las acciones en los medios de comunicación</b>. El Timing global integra todas las acciones."},
+{id:147,t:"T15",s:"docx",q:"¿Cuáles son los tipos de calendarios de inserciones publicitarias?",o:["Calendarios de intervalos regular e irregulares","Calendarios de olas irregulares, regulares, método de presión uniforme y método de presión concentrada","Calendario informativo y publipromocional","Ninguna"],c:1,e:"Existen 4 tipos: <b>1) Olas irregulares (sorpresa), 2) Olas regulares (periódico), 3) Presión uniforme (constante, sin carencias), 4) Presión concentrada (corto periodo, productos estacionales)</b>."},
+{id:148,t:"T15",s:"docx",q:"Ley de Recuerdo de Morgensztern:",o:["Se basa en el número de objetos que recordamos de cada anuncio","Se basa en la respuesta del individuo al estímulo, otorgando un valor entre 0 y 1","Se basa en recordar el máximo número de eslóganes","Es básicamente la respuesta a las ofertas"],c:1,e:"La <b>Ley de Morgensztern</b> se basa en la <b>respuesta del individuo al estímulo (el anuncio) en términos de recuerdo</b>, otorgando un valor entre 0 (ningún efecto) y 1 (recuerda completamente)."},
+{id:149,t:"T15",s:"docx",q:"¿Qué se entiende por eficacia publicitaria?",o:["La capacidad para generar recuerdo","Determina la intensidad del impacto del mensaje","El grado de consecución de los objetivos marcados para la publicidad","Ninguna"],c:2,e:"La <b>eficacia publicitaria</b> es el <b>grado de consecución de los objetivos marcados para la publicidad</b>."},
+{id:150,t:"T15",s:"docx",q:"¿Cuáles son los criterios para la selección de medios según el producto?",o:["La imagen del medio, la credibilidad, la creatividad, el alcance y la innovación","Credibilidad, confianza e interés por la tecnología","Las dos son correctas","Ninguna"],c:0,e:"Criterios: <b>1) Imagen del medio, 2) Credibilidad y confianza, 3) Creatividad (TV/radio), 4) Alcance, 5) Innovación (internet)</b>."},
+{id:151,t:"T15",s:"docx",q:"La audiencia útil de un medio es:",o:["Parte de la audiencia total que pertenece al público objetivo previamente definido","Nº total de personas que se exponen regularmente a un medio","Nº de personas expuestas dividido por personas que pueden acceder × 100","Indicador que compara porcentajes de perfiles"],c:0,e:"<b>Audiencia útil</b>: parte de la audiencia total que <b>pertenece al público objetivo</b>. Pertenece simultáneamente a la audiencia del medio y al target."},
+{id:152,t:"T15",s:"docx",q:"¿Qué es el índice de afinidad?",o:["Número de personas expuestas regularmente a un medio","Parte de la audiencia que pertenece al público objetivo","Es un indicador que compara porcentajes de perfiles de audiencia","Ninguna"],c:2,e:"El <b>índice de afinidad</b> es un <b>indicador que compara porcentajes de perfiles de audiencia</b>."},
+// T15 KAHOOT
+{id:153,t:"T15",s:"kah",q:"¿Qué objetivos publicitarios facilitan datos sobre productos o marcas?",o:["Objetivos de actitudes","Objetivos de información","Objetivos de comportamiento","Objetivos de entrenamiento"],c:1,e:"Los <b>objetivos de información</b> facilitan datos sobre los productos, marcas, empresa, precios, etc. Constituyen la publicidad informativa."},
+{id:154,t:"T15",s:"kah",q:"¿Qué calendario usa breves periodos con momentos sin anuncios?",o:["Olas regulares","Presión uniforme","Olas irregulares","Presión concentrada"],c:2,e:"El calendario de <b>olas irregulares</b>: distribuye los anuncios en breves períodos separados por momentos de carencia. Genera efecto sorpresa en el consumidor."},
+{id:155,t:"T15",s:"kah",q:"¿Qué método reparte inserciones de forma regular y sin carencias?",o:["Olas regulares","Presión uniforme","Olas irregulares","Presión concentrada"],c:1,e:"El <b>método de presión uniforme</b> consiste en distribuir inserciones publicitarias de forma regular durante toda la campaña. No existen períodos de carencia."},
+{id:156,t:"T15",s:"kah",q:"¿Qué objetivos buscan modificar actitudes y opiniones?",o:["Objetivos técnicos","Objetivos de información","Objetivos de presupuesto","Objetivos de actitudes"],c:3,e:"Los <b>objetivos de actitudes</b> buscan la creación, refuerzo o modificación de las actitudes y opiniones del público objetivo. Son la publicidad de imagen."},
+{id:157,t:"T15",s:"kah",q:"¿Qué objetivos buscan que el consumidor actúe?",o:["De recuerdo","De cobertura","De comportamiento","De edición"],c:2,e:"Los <b>objetivos de comportamiento</b> buscan modificar el comportamiento de los consumidores: acudir a un establecimiento, solicitar presupuesto, etc."},
+{id:158,t:"T15",s:"kah",q:"¿Qué documento distribuye las inserciones en el tiempo?",o:["Mapa del sitio","Brief creativo","Calendario de inserciones","Guion técnico"],c:2,e:"El <b>calendario de inserciones publicitarias</b> (o timing) es un documento en el que se refleja la planificación de las acciones del plan de medios en el tiempo."},
+{id:159,t:"T15",s:"kah",q:"¿Qué factor implica mayor consumo en ciertas épocas del año?",o:["Frecuencia","Cobertura","Recuerdo","Estacionalidad"],c:3,e:"La <b>estacionalidad</b> del producto se refiere a la época del año en la que más se consume. Ej: juguetes en Navidad, helados en verano."},
+{id:160,t:"T15",s:"kah",q:"¿Qué variable indica a cuántas personas llega un medio?",o:["Alcance","Tipografía","Mezcla de sonido","Vector"],c:0,e:"El <b>alcance</b> indica a cuántas personas llega un medio. Las marcas globales tienen ventaja al poder optar por las mejores ubicaciones y franjas horarias."},
+];
+
+// ===================== ESTADO =====================
+const ST = {
+  mode:'simulacro', tema:'todos', src:'todas',
+  pool:[], cur:0, answered:false, session:[],
+  fails:[], hist:{done:0,ok:0}, fi:0,
+};
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function setMode(m,el){
+  ST.mode=m;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('filters-tema').style.display=(m==='porTema')?'flex':'none';
+  const labels={simulacro:'Empezar simulacro (30 preguntas) ↗',flashcards:'Empezar flashcards ↗',porTema:'Estudiar tema seleccionado ↗',fallos:ST.fails.length>0?`Repasar ${ST.fails.length} fallos ↗`:'Sin fallos aún'};
+  document.getElementById('start-btn').textContent=labels[m];
+}
+
+function selTema(el,t){document.querySelectorAll('[onclick^="selTema"]').forEach(x=>x.classList.remove('active'));el.classList.add('active');ST.tema=t;}
+function selSrc(el,s){document.querySelectorAll('[onclick^="selSrc"]').forEach(x=>x.classList.remove('active'));el.classList.add('active');ST.src=s;}
+
+function buildPool(){
+  let pool=[...Q];
+  if(ST.tema!=='todos') pool=pool.filter(q=>q.t===ST.tema);
+  if(ST.src!=='todas') pool=pool.filter(q=>q.s===ST.src);
+  return shuffle(pool);
+}
+
+function startSession(){
+  if(ST.mode==='fallos'&&ST.fails.length===0)return;
+  let pool;
+  if(ST.mode==='simulacro') pool=buildPool().slice(0,30);
+  else if(ST.mode==='flashcards'||ST.mode==='porTema') pool=buildPool();
+  else pool=shuffle(Q.filter(q=>ST.fails.includes(q.id)));
+  ST.pool=pool; ST.cur=0; ST.session=[];
+  if(ST.mode==='flashcards'){ST.fi=0;showScreen('screen-flash');renderFlash();}
+  else{showScreen('screen-quiz');renderQ();}
+}
+
+const srcLabel={'docx':'📝 Examen','kah':'🎮 Kahoot','rep':'🔁 Repaso'};
+const srcClass={'docx':'src-docx','kah':'src-kah','rep':'src-rep'};
+const difLabel={alta:'🔴 Difícil',media:'🟡 Media',baja:'🟢 Fácil'};
+
+function renderQ(){
+  const q=ST.pool[ST.cur], n=ST.pool.length;
+  document.getElementById('q-progress').textContent=`${ST.cur+1}/${n}`;
+  document.getElementById('progress-fill').style.width=Math.round(ST.cur/n*100)+'%';
+  document.getElementById('q-meta').innerHTML=`<span class="q-tag tema">${q.t}</span><span class="q-tag ${srcClass[q.s]}">${srcLabel[q.s]}</span>`;
+  document.getElementById('q-text').textContent=q.q;
+  const L=['A','B','C','D'];
+  document.getElementById('q-options').innerHTML=q.o.map((o,i)=>`<button class="option" onclick="selectAnswer(${i})"><span class="opt-letter">${L[i]}</span>${o}</button>`).join('');
+  document.getElementById('q-explanation').className='explanation';
+  document.getElementById('q-explanation').innerHTML='';
+  document.getElementById('next-btn').className='next-btn';
+  ST.answered=false;
+}
+
+function selectAnswer(idx){
+  if(ST.answered)return; ST.answered=true;
+  const q=ST.pool[ST.cur];
+  const opts=document.querySelectorAll('.option');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const ok=idx===q.c;
+  opts[idx].classList.add(ok?'correct':'wrong');
+  if(!ok)opts[q.c].classList.add('show-correct');
+  const expEl=document.getElementById('q-explanation');
+  expEl.innerHTML=`<strong>${ok?'✓ Correcto':'✗ Incorrecto'}</strong> — ${q.e}`;
+  expEl.className='explanation show'+(ok?'':' wrong-exp');
+  ST.session.push({id:q.id,ok});
+  ST.hist.done++; if(ok){ST.hist.ok++;ST.fails=ST.fails.filter(f=>f!==q.id);}
+  else if(!ST.fails.includes(q.id))ST.fails.push(q.id);
+  updateStats();
+  const nb=document.getElementById('next-btn');
+  nb.className='next-btn show';
+  nb.textContent=ST.cur+1<ST.pool.length?'Siguiente →':'Ver resultados →';
+}
+
+function nextQuestion(){ST.cur++;ST.cur>=ST.pool.length?showResults():renderQ();}
+
+function renderFlash(){
+  const q=ST.pool[ST.fi],n=ST.pool.length;
+  document.getElementById('f-progress').textContent=`${ST.fi+1}/${n}`;
+  document.getElementById('f-fill').style.width=Math.round(ST.fi/n*100)+'%';
+  document.getElementById('f-meta').innerHTML=`<span class="q-tag tema">${q.t}</span><span class="q-tag ${srcClass[q.s]}">${srcLabel[q.s]}</span>`;
+  document.getElementById('f-question').textContent=q.q;
+  document.getElementById('f-answer').textContent=q.o[q.c];
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('card-controls').style.display='none';
+}
+
+function flipCard(){
+  const fc=document.getElementById('flashcard');
+  fc.classList.toggle('flipped');
+  document.getElementById('card-controls').style.display=fc.classList.contains('flipped')?'flex':'none';
+}
+
+function cardResult(knew){
+  const q=ST.pool[ST.fi];
+  if(!knew&&!ST.fails.includes(q.id))ST.fails.push(q.id);
+  if(knew)ST.fails=ST.fails.filter(f=>f!==q.id);
+  ST.fi++;
+  if(ST.fi>=ST.pool.length)goHome();
+  else renderFlash();
+}
+
+function showResults(){
+  const ok=ST.session.filter(s=>s.ok).length, wr=ST.session.length-ok;
+  const pct=Math.round(ok/ST.session.length*100), pass=pct>=50;
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('score-label').textContent=pass?'APROBADO':'REPASA';
+  document.getElementById('score-circle').className='score-circle '+(pass?'pass':'fail');
+  document.getElementById('res-title').textContent=pass?'¡Buen resultado!':'Sigue practicando';
+  document.getElementById('res-sub').textContent=`${ST.session.length} preguntas respondidas`;
+  document.getElementById('res-correct').textContent=ok;
+  document.getElementById('res-wrong').textContent=wr;
+  document.getElementById('res-total').textContent=ST.session.length;
+  let html='';
+  const wrongs=ST.session.filter(s=>!s.ok);
+  if(wrongs.length>0){
+    html='<div class="review-title">Preguntas falladas</div>';
+    wrongs.forEach(s=>{const q=Q.find(x=>x.id===s.id);html+=`<div class="review-item">${q.q}<div class="review-correct">✓ ${q.o[q.c]}</div></div>`;});
+  }
+  document.getElementById('review-list').innerHTML=html;
+  showScreen('screen-results');
+}
+
+function repeatFails(){
+  if(ST.fails.length===0){goHome();return;}
+  ST.pool=shuffle(Q.filter(q=>ST.fails.includes(q.id)));
+  ST.cur=0;ST.session=[];
+  showScreen('screen-quiz');renderQ();
+}
+
+const CHEAT=[
+  {t:"T8",h:"Técnicas de Creatividad Publicitaria",rows:[
+    ["Creatividad","Capacidad de producir ideas originales o establecer conexiones entre ideas no relacionadas. Cualidades: riesgo, pensamiento divergente, humor."],
+    ["P. convergente","Busca UNA única solución correcta usando la lógica para eliminar posibilidades."],
+    ["P. divergente","Enfoque ABIERTO: los problemas tienen más de una solución/camino."],
+    ["Estilo racional","Argumentos de ventajas del producto frente a competencia. Argumentos irrebatibles."],
+    ["Estilo emocional","Influye sobre el COMPROMISO del usuario con el producto/servicio/marca."],
+    ["Enfoq. asociativo","3 formas: Serendipia (casualidad), Semejanza (similitud), Mediación (elementos comunes)."],
+    ["Enfoq. analógico","Comprender lo desconocido a través de lo conocido. Métodos: Sinéctica, Biónica, Funcional, Relaciones forzadas."],
+    ["Enfoq. combinatorio","También llamado aleatorio. Combina conceptos al azar. Técnicas: Ideogramación y Superposición."],
+    ["7 pasos Osborn","Orientación → Preparación → Análisis → Ideación → Incubación → Síntesis → Evaluación."],
+    ["Apelaciones emocionales","Atractivo personal, social, llamamiento al miedo, apelación al humor."],
+  ]},
+  {t:"T9",h:"Principales Modelos sobre el Proceso Creativo",rows:[
+    ["USP","Unique Selling Proposition: propuesta única de venta, lo que diferencia al producto de la competencia."],
+    ["Copy Strategy","Define los elementos por los que el consumidor prefiere comprar. 3 puntos: Público, Beneficio básico, Creencia y entrega."],
+    ["Star Strategy","El mensaje se centra en la PERSONALIDAD DE LA MARCA. Elementos: variables físicas, carácter y estilo."],
+    ["Director creativo","Labores de dirección creativa Y gestión empresarial. Orienta campañas y gestiona equipos."],
+    ["Ethos","Apela a la AUTORIDAD, CONFIANZA o CREDIBILIDAD."],
+    ["Pathos","Apela a la EMOCIÓN. Muestra dolor/miedo y ofrece solución."],
+    ["Logos","Apela a la LÓGICA y la RAZÓN. Ofrece hechos."],
+    ["Sujeto creativo","Características: motivación, sensibilidad, flexibilidad, independencia de juicio, pensamiento no convencional, tenacidad."],
+  ]},
+  {t:"T10",h:"La Imagen de Empresa en Internet",rows:[
+    ["Digital Branding","Gestión de la imagen y marca en internet. Busca fortalecer la huella digital."],
+    ["Sitemap HTML","Orientado a los USUARIOS del sitio. Facilita la navegación."],
+    ["Sitemap XML","Orientado a los MOTORES DE BÚSQUEDA. Mejora el SEO. Se envía a Google Search Console."],
+    ["Identidad corp.","Logotipo, lema, eslogan, tipografía, embalaje y contenido."],
+    ["Gen. silenciosa","Nacidos antes de 1945. Uso internet: 44%. Conservadores y desconfiados. Patrimonio consolidado."],
+    ["Baby boomers","Nacidos 1946-1964. Uso internet: 68%. Conservadores, poder adquisitivo importante."],
+    ["Generación X","Nacidos 1965-1978. Uso internet: 73%. Perfil arriesgado, adaptados a los canales online."],
+    ["Millennial","Nacidos 1979-1994. Uso internet: >80%. Confiados, hedónicos, orientados al disfrute."],
+    ["Generación Z","Nacidos a partir de 1995. Nativos digitales. Relación con el mundo via redes sociales."],
+  ]},
+  {t:"T11",h:"Imagen Digital",rows:[
+    ["SMM","Social Media Marketing: estrategia GLOBAL en torno a redes sociales en todo internet."],
+    ["SMO","Social Media Optimization: acciones en UN sitio web para mejorar el tráfico y conversiones."],
+    ["Banner - PPI","Pago por impresión: contratación por número de apariciones en pantalla."],
+    ["Banner - PPC","Pago por clic: contratación por número de clics. Más efectivo que PPI."],
+    ["Postproducción","1)Edición vídeo, 2)Edición sonido, 3)Música, 4)Efectos visuales, 5)Mezcla sonido, 6)Corrección color, 7)Gráficos."],
+    ["FPS cine","24 FPS: cine. 25 FPS: TV europea. 29,97 FPS: TV estadounidense."],
+    ["Animación","Visualización rápida de secuencia de imágenes en 2D para crear ilusión de movimiento."],
+  ]},
+  {t:"T12",h:"Inserción de Textos y Elementos Multimedia",rows:[
+    ["Serif","Tienen pies/líneas pequeñas. Mejor para textos largos en papel impreso. Ej: Times New Roman."],
+    ["Sans Serif","Sin pies. Preferidas para elementos pequeños y digitales. Ej: Arial, Helvetica."],
+    ["GIF","Compresión SIN PÉRDIDA. Usado para animaciones. Límite de colores."],
+    ["PNG","Mayor calidad de compresión. Permite TRANSPARENCIA ALFA. NO admite animaciones."],
+    ["JPEG","Compresión CON PÉRDIDA. Disminuye tamaño pero baja calidad. Fotos de cámaras y móviles."],
+    ["PDF","Portable Document Format. Puede incrustar fuentes tipográficas, botones, vídeos y enlaces."],
+    ["MP3","Formato de audio estándar. Ventaja: pequeño tamaño. Puede distorsionar sonidos."],
+    ["WAV","Audio SIN comprimir. Mayor calidad que MP3. Ocupa más espacio."],
+    ["Hipertexto","Concepto que define la estructura de la WWW. Puede almacenarse, leerse, buscarse o editarse."],
+    ["Blog","Contenido en orden cronológico inverso. Sirve para posicionar la web en buscadores (SEO)."],
+  ]},
+  {t:"T13",h:"Elaboración de Material Audiovisual",rows:[
+    ["Preproducción","TODO antes de grabar: guión, storyboard, presupuesto, casting, localizaciones, vestuario."],
+    ["Producción","La grabación en sí. Director asegura que todo sea atractivo, relevante y fiel al guión."],
+    ["Postproducción","Ensamblaje del material grabado: edición, música, efectos, corrección de color, diseño de sonido."],
+    ["Storyboard","Representación en formato cómic que acompaña al guión y ayuda al equipo a entender qué se va a grabar."],
+    ["Plantilla","Documento en blanco con diseño predefinido (encabezados, color, fuentes). Acelera la creación."],
+    ["Asistente","Software que simplifica tareas complejas o instruye sobre cómo completarlas."],
+    ["Gráficos en pres.","Circulares (porcentajes), barras verticales (cambios en tiempo), barras horizontales (comparar cantidades), lineales (tendencias)."],
+  ]},
+  {t:"T14",h:"Programas Específicos de Diseño",rows:[
+    ["Photoshop","Editor de gráficos rasterizados (píxeles). Edición por CAPAS. Para retocar fotos y carteles."],
+    ["Lightroom","Edición NO DESTRUCTIVA, lineal, SIN CAPAS. Guarda cambios en un catálogo separado."],
+    ["Illustrator","Gráficos VECTORIALES. Para logotipos, señalizaciones, diseño gráfico. Sin pérdida al ampliar."],
+    ["CorelDraw","Gráficos VECTORIALES. Alternativa a Illustrator."],
+    ["InDesign","MAQUETACIÓN: folletos, revistas, periódicos, carteles, tarjetas de visita."],
+    ["WordPress","CMS gratuito y open source. Versión .com (servidores WP) y .org (servidor propio, más personalizable)."],
+    ["Mapa de bits","Compuestos por PÍXELES. Al ampliar pierden calidad. Formatos: JPG, GIF, PNG."],
+    ["Vectoriales","Basados en FÓRMULAS MATEMÁTICAS. NO pierden calidad al ampliarse."],
+  ]},
+  {t:"T15",h:"Organización del Plan de Difusión",rows:[
+    ["Obj. publicitarios","Son COMUNICACIONALES (no de ventas). 3 grupos: Información, Actitudes, Comportamiento."],
+    ["Presupuesto publi.","Según objetivos = método más adecuado. Otros: % ventas anteriores (2-5%), paridad competitiva."],
+    ["Timing global","Integra TODAS las acciones planeadas para la campaña."],
+    ["Timing difusión","Establece las APARICIONES DE LAS ACCIONES en los medios de comunicación."],
+    ["Olas irregulares","Períodos breves de anuncios separados por períodos de carencia. Efecto sorpresa."],
+    ["Olas regulares","El mensaje se emite de forma PERIÓDICA y REGULAR."],
+    ["Presión uniforme","Distribución REGULAR durante toda la campaña. Sin períodos de carencia."],
+    ["Presión concentrada","Todos los mensajes en un CORTO PERÍODO. Habitual en productos estacionales (dulces navideños)."],
+    ["Eficacia publi.","Grado de consecución de los objetivos marcados para la publicidad."],
+    ["Ley Morgensztern","Respuesta del individuo al estímulo (anuncio) en términos de recuerdo. Valor: 0 (ningún efecto) a 1 (recuerda completamente)."],
+    ["Audiencia bruta","Nº total de personas expuestas regularmente a un medio o soporte."],
+    ["Audiencia útil","Parte de la audiencia total que pertenece al público objetivo."],
+    ["Índice de afinidad","Indicador que compara porcentajes de perfiles de audiencia."],
+    ["Rating","Audiencia útil como valor relativo respecto al público objetivo."],
+    ["Penetración","(personas expuestas / personas que pueden acceder) × 100."],
+    ["Criterios medios","Imagen del medio, credibilidad, creatividad (TV/radio), alcance y innovación (internet)."],
+  ]},
+];
+
+function showCheatsheet(){
+  document.getElementById('cheat-content').innerHTML=CHEAT.map(t=>`
+    <div class="cs-section">
+      <div class="cs-head" onclick="toggleCs(this)">${t.t} — ${t.h} <span>▾</span></div>
+      <div class="cs-body">${t.rows.map(r=>`<div class="cs-row"><span class="cs-key">${r[0]}</span><span class="cs-val">${r[1]}</span></div>`).join('')}</div>
+    </div>`).join('');
+  showScreen('screen-cheat');
+}
+
+function toggleCs(el){const b=el.nextElementSibling;b.classList.toggle('open');el.querySelector('span').textContent=b.classList.contains('open')?'▴':'▾';}
+
+function goHome(){updateStats();showScreen('screen-home');}
+
+function showScreen(id){
+  ['screen-home','screen-quiz','screen-results','screen-flash','screen-cheat'].forEach(s=>{document.getElementById(s).classList.toggle('hidden',s!==id);});
+}
+
+function updateStats(){
+  document.getElementById('stat-done').textContent=ST.hist.done;
+  document.getElementById('stat-correct').textContent=ST.hist.ok;
+  document.getElementById('stat-pct').textContent=ST.hist.done>0?Math.round(ST.hist.ok/ST.hist.done*100)+'%':'—';
+  if(ST.mode==='fallos')document.getElementById('start-btn').textContent=ST.fails.length>0?`Repasar ${ST.fails.length} fallos ↗`:'Sin fallos aún';
+}
+</script>
